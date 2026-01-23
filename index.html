@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뉴스 그래픽 검수 도구</title>
+    <title>뉴스 그래픽 검수 도구 (맞춤법 검사 통합)</title>
     <style>
         * {
             margin: 0;
@@ -106,6 +106,28 @@
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #555;
         }
 
         textarea {
@@ -303,93 +325,119 @@
 
         .stat-number {
             font-size: 2em;
-            font-weight: 700;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
         .stat-label {
             font-size: 0.9em;
             opacity: 0.9;
-            margin-top: 5px;
+        }
+
+        .grammar-result {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .grammar-error {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .grammar-error-original {
+            color: #dc3545;
+            font-weight: 600;
+            text-decoration: line-through;
+        }
+
+        .grammar-error-suggestion {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .grammar-help {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📰 뉴스 그래픽 검수 도구</h1>
-            <p>맥락 파악 AI 검수 시스템 - 오타 · 인물정보 · 수치 검증</p>
-            <div style="margin-top: 15px; font-size: 0.95em; opacity: 0.95;">
-                ✓ 그래픽 내용의 맥락을 파악하여 검수<br>
-                ✓ 인물-직함 매칭, 수치 정확성, 오타 검사<br>
-                ✓ 간단한 bullet point 결과
-            </div>
-        </div>
-
-        <div class="card api-config">
-            <h2>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-                API 설정
-            </h2>
-            <div class="input-group">
-                <label for="apiKey">Google Gemini API Key (Google Search 기능 포함)</label>
-                <input 
-                    type="password" 
-                    id="apiKey" 
-                    placeholder="AIza..." 
-                    value="">
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    • API 키는 브라우저에만 저장되며 서버로 전송되지 않습니다<br>
-                    • Google Search grounding으로 실시간 뉴스 사이트 검색<br>
-                    • 무료: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #667eea;">https://aistudio.google.com/app/apikey</a>
-                </small>
-            </div>
+            <h1>📋 뉴스 그래픽 검수 도구</h1>
+            <p>맞춤법 검사 + AI 팩트체크 통합 버전</p>
         </div>
 
         <div class="main-content">
+            <!-- 입력 영역 -->
             <div class="card">
                 <h2>
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
-                    검수할 내용 입력
+                    검수 내용 입력
                 </h2>
+
+                <div class="api-config">
+                    <div class="input-group">
+                        <label for="apiKey">🔑 Gemini API 키</label>
+                        <input 
+                            type="password" 
+                            id="apiKey" 
+                            placeholder="Gemini API 키를 입력하세요"
+                        >
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enableGrammarCheck" checked>
+                    <label for="enableGrammarCheck">
+                        <strong>맞춤법 검사 활성화</strong> (부산대 맞춤법 검사기)
+                    </label>
+                </div>
+
                 <textarea 
                     id="inputText" 
-                    placeholder="뉴스 그래픽에 들어갈 내용을 붙여넣으세요...&#10;&#10;"></textarea>
-                <div class="char-count">
-                    <span id="charCount">0</span> 글자
-                </div>
+                    placeholder="검수할 뉴스 그래픽 내용을 입력하세요...
+
+예시:
+윤석열 대통령, 2024년 GDP 3.5%
+삼성전자 주가 80,000원"
+                ></textarea>
+                <div class="char-count" id="charCount">0자</div>
+
                 <div class="button-group">
-                    <button class="btn-primary" id="checkBtn">
-                        🔍 검수 시작
-                    </button>
-                    <button class="btn-secondary" id="clearBtn">
-                        🗑️ 지우기
-                    </button>
+                    <button class="btn-primary" id="checkBtn">🔍 검수 시작</button>
+                    <button class="btn-secondary" id="clearBtn">🗑️ 초기화</button>
                 </div>
             </div>
 
+            <!-- 결과 영역 -->
             <div class="card">
                 <h2>
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
                     검수 결과
                 </h2>
-                <div id="results">
+                <div class="results" id="results">
                     <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
                         </svg>
-                        <p>검수할 내용을 입력하고 '검수 시작' 버튼을 클릭하세요</p>
+                        <p><strong>검수 결과가 여기에 표시됩니다</strong></p>
+                        <p>내용을 입력하고 '검수 시작' 버튼을 눌러주세요</p>
                     </div>
                 </div>
             </div>
@@ -397,35 +445,45 @@
     </div>
 
     <script>
-        // API 키 저장 및 로드
-        const API_KEY_STORAGE = 'gemini_api_key';
         const apiKeyInput = document.getElementById('apiKey');
         const inputText = document.getElementById('inputText');
+        const charCount = document.getElementById('charCount');
         const checkBtn = document.getElementById('checkBtn');
         const clearBtn = document.getElementById('clearBtn');
         const results = document.getElementById('results');
-        const charCount = document.getElementById('charCount');
+        const enableGrammarCheck = document.getElementById('enableGrammarCheck');
 
-        // 저장된 API 키 로드
-        const savedKey = localStorage.getItem(API_KEY_STORAGE);
-        if (savedKey) {
-            apiKeyInput.value = savedKey;
+        // API 키 로컬 스토리지 저장/불러오기
+        const savedApiKey = localStorage.getItem('gemini_api_key');
+        if (savedApiKey) {
+            apiKeyInput.value = savedApiKey;
         }
 
-        // API 키 저장
         apiKeyInput.addEventListener('change', () => {
-            localStorage.setItem(API_KEY_STORAGE, apiKeyInput.value);
+            localStorage.setItem('gemini_api_key', apiKeyInput.value);
         });
 
         // 글자 수 카운트
         inputText.addEventListener('input', () => {
-            charCount.textContent = inputText.value.length;
+            charCount.textContent = `${inputText.value.length}자`;
         });
 
-        // 지우기 버튼
+        // 초기화
         clearBtn.addEventListener('click', () => {
             inputText.value = '';
-            charCount.textContent = '0';
+            charCount.textContent = '0자';
+            results.innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                    <p><strong>검수 결과가 여기에 표시됩니다</strong></p>
+                    <p>내용을 입력하고 '검수 시작' 버튼을 눌러주세요</p>
+                </div>
+            `;
         });
 
         // 검수 시작
@@ -452,14 +510,29 @@
             results.innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p><strong>AI가 내용의 맥락을 파악하고 검수하고 있습니다...</strong></p>
-                    <p style="font-size: 0.9em; color: #666;">인물 정보, 수치, 오타 등을 뉴스 소스와 교차 확인 중</p>
+                    <p><strong>검수를 진행하고 있습니다...</strong></p>
+                    <p style="font-size: 0.9em; color: #666;">맞춤법 검사 → AI 팩트체크 순서로 진행됩니다</p>
                 </div>
             `;
 
             try {
-                const result = await checkContent(apiKey, text);
-                displayResults(result);
+                let grammarResult = null;
+                let aiResult = null;
+
+                // 1. 맞춤법 검사 (선택적)
+                if (enableGrammarCheck.checked) {
+                    try {
+                        grammarResult = await checkGrammar(text);
+                    } catch (error) {
+                        console.error('Grammar check error:', error);
+                    }
+                }
+
+                // 2. AI 팩트체크
+                aiResult = await checkContent(apiKey, text);
+
+                // 3. 결과 표시
+                displayResults(grammarResult, aiResult);
             } catch (error) {
                 results.innerHTML = `
                     <div class="result-item error">
@@ -472,6 +545,40 @@
                 checkBtn.textContent = '🔍 검수 시작';
             }
         });
+
+        async function checkGrammar(text) {
+            // 개행문자 변환 (부산대 검사기 요구사항)
+            const processedText = text.replace(/\n/g, '\r\n');
+            
+            // 부산대 맞춤법 검사기 API 호출
+            const response = await fetch('http://164.125.7.61/speller/results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `text1=${encodeURIComponent(processedText)}`
+            });
+
+            if (!response.ok) {
+                throw new Error('맞춤법 검사 API 요청 실패');
+            }
+
+            const html = await response.text();
+            
+            // HTML에서 데이터 추출
+            const dataMatch = html.match(/data = \[([\s\S]*?)\];/);
+            if (!dataMatch) {
+                return { errInfo: [] };
+            }
+
+            try {
+                const data = JSON.parse(dataMatch[1]);
+                return data;
+            } catch (e) {
+                console.error('Grammar data parse error:', e);
+                return { errInfo: [] };
+            }
+        }
 
         async function checkContent(apiKey, text) {
             const prompt = `당신은 대한민국 뉴스 방송국의 그래픽 검수자입니다.
@@ -529,39 +636,6 @@ ${text}
     "errors": 오류 개수,
     "verified": 정확한 항목 개수,
     "unverified": 확인 필요 항목 개수
-  }
-}
-
-**예시:**
-입력: "윤석열 대통령, 2024년 GDP 3.5%, 삼성전자 주가 80,000원"
-
-출력:
-{
-  "issues": [
-    {
-      "item": "윤석열 대통령",
-      "status": "정확함",
-      "problem": null,
-      "correct": null
-    },
-    {
-      "item": "2024년 GDP 3.5%",
-      "status": "오류",
-      "problem": "실제 GDP 성장률과 다름",
-      "correct": "2.8%"
-    },
-    {
-      "item": "삼성전자 주가 80,000원",
-      "status": "확인필요",
-      "problem": "날짜가 명시되지 않아 정확한 확인 불가",
-      "correct": null
-    }
-  ],
-  "summary": {
-    "total": 3,
-    "errors": 1,
-    "verified": 1,
-    "unverified": 1
   }
 }
 
@@ -635,15 +709,51 @@ JSON만 응답하세요.`;
             return JSON.parse(jsonMatch[0]);
         }
 
-        function displayResults(result) {
-            const { issues, summary } = result;
-
+        function displayResults(grammarResult, aiResult) {
             let html = '';
+
+            // 맞춤법 검사 결과
+            if (grammarResult && grammarResult.errInfo && grammarResult.errInfo.length > 0) {
+                html += `
+                    <div class="result-item warning">
+                        <h3>📝 맞춤법 검사 결과 (${grammarResult.errInfo.length}개 발견)</h3>
+                        <div style="margin-top: 15px;">
+                `;
+
+                grammarResult.errInfo.forEach((err, index) => {
+                    const suggestions = err.candWord ? err.candWord.split(' ') : [];
+                    html += `
+                        <div class="grammar-error">
+                            <div>
+                                <span class="grammar-error-original">${err.orgStr}</span>
+                                ${suggestions.length > 0 ? '→' : ''}
+                                ${suggestions.map(s => `<span class="grammar-error-suggestion">${s}</span>`).join(' / ')}
+                            </div>
+                            ${err.help ? `<div class="grammar-help">${err.help}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            } else if (grammarResult) {
+                html += `
+                    <div class="result-item success">
+                        <h3>✅ 맞춤법 검사 통과</h3>
+                        <p>맞춤법 오류가 발견되지 않았습니다.</p>
+                    </div>
+                `;
+            }
+
+            // AI 팩트체크 결과
+            const { issues, summary } = aiResult;
 
             // 요약 통계
             html += `
                 <div class="summary">
-                    <h3>📊 검수 결과</h3>
+                    <h3>📊 AI 팩트체크 결과</h3>
                     <div class="summary-stats">
                         <div class="stat">
                             <div class="stat-number">${summary.total || 0}</div>
@@ -669,7 +779,7 @@ JSON만 응답하세요.`;
             if (!issues || issues.length === 0) {
                 html += `
                     <div class="result-item success">
-                        <h3>✅ 검수 완료</h3>
+                        <h3>✅ 팩트체크 완료</h3>
                         <p>모든 내용이 정확합니다.</p>
                     </div>
                 `;
